@@ -9,8 +9,6 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Getter
-@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
@@ -35,4 +33,60 @@ public class Facture  implements Serializable{
 	@OneToMany(mappedBy = "facturesr")
 	@JsonIgnore
 	private Set<ReglementFacture> reglementFactures = new HashSet<>();
+
+	public Long getIdFact() {
+		return idFact;
+	}
+
+	public void setIdFact(Long idFact) {
+		this.idFact = idFact;
+	}
+
+	public String getDateFact() {
+		return dateFact;
+	}
+
+	public void setDateFact(String dateFact) {
+		this.dateFact = dateFact;
+	}
+
+	public int getNum() {
+		return num;
+	}
+
+	public void setNum(int num) {
+		this.num = num;
+	}
+
+	public client getClient() {
+		return client;
+	}
+
+	public void setClient(com.Ecommerce.Entity.client client) {
+		this.client = client;
+	}
+
+	public Devise getDevise() {
+		return devise;
+	}
+
+	public void setDevise(Devise devise) {
+		this.devise = devise;
+	}
+
+	public Set<DetailFacture> getDetailFactures() {
+		return detailFactures;
+	}
+
+	public void setDetailFactures(Set<DetailFacture> detailFactures) {
+		this.detailFactures = detailFactures;
+	}
+
+	public Set<ReglementFacture> getReglementFactures() {
+		return reglementFactures;
+	}
+
+	public void setReglementFactures(Set<ReglementFacture> reglementFactures) {
+		this.reglementFactures = reglementFactures;
+	}
 }

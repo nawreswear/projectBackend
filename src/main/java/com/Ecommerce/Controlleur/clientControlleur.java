@@ -1,10 +1,8 @@
 package com.Ecommerce.Controlleur;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 import com.Ecommerce.Entity.Facture;
-import com.Ecommerce.Entity.Produit;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -66,13 +64,29 @@ public class clientControlleur {
 	}
 	@GetMapping("/{clientId}/chiffre-affaires")
 	public ResponseEntity<Double> getChiffreAffairesGlobal(@PathVariable Long clientId) {
-		Double chiffreAffaires = clientserv.calculerChiffreAffairesGlobal(clientId);
+		double chiffreAffaires = clientserv.calculerChiffreAffairesGlobal(clientId);
 		return ResponseEntity.ok(chiffreAffaires);
 	}
 
 	@GetMapping("/{clientId}/chiffre-affaires/{annee}")
-	public ResponseEntity<Double> getChiffreAffairesAnnee(@PathVariable Long clientId, @PathVariable int annee) {
-		Double chiffreAffaires = clientserv.calculerChiffreAffairesParAn(clientId, annee);
+	public ResponseEntity<Double> getChiffreAffairesAnnee(@PathVariable Long clientId,@PathVariable int annee) {
+		double chiffreAffaires = clientserv.calculerChiffreAffairesParAn(clientId,annee);
 		return ResponseEntity.ok(chiffreAffaires);
 	}
+	@GetMapping("/mostPurchasedProducts/{clientId}")
+	public ResponseEntity<Map<String, Long>> getMostPurchasedProductsByClient(@PathVariable Long clientId) {
+		client client = clientserv.getclientById(clientId);
+		if (client == null) {
+			return ResponseEntity.notFound().build();
+		}
+
+		Map<String, Long> mostPurchasedProducts = clientserv.getMostPurchasedProducts(client);
+		return ResponseEntity.ok(mostPurchasedProducts);
+	}
+	@GetMapping("/calculerResteGlobalMontantsNonPayes/{idClient}")
+	public ResponseEntity<Double> calculerResteGlobalMontantsNonPayes(@PathVariable Long idClient) {
+		Double resteGlobal = clientserv.calculerResteGlobalMontantsNonPayes(idClient);
+		return ResponseEntity.ok(resteGlobal);
+	}
+
 }

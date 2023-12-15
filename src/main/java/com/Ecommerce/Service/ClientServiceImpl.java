@@ -1,21 +1,22 @@
 package com.Ecommerce.Service;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import com.Ecommerce.Entity.DetailFacture;
 import com.Ecommerce.Entity.Facture;
-import com.Ecommerce.Entity.Produit;
+import com.Ecommerce.Entity.ReglementFacture;
+import com.Ecommerce.Repositry.FactureRepositry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.Ecommerce.Entity.client;
 import com.Ecommerce.Repositry.ClientRepositry;
+import java.time.LocalDate;
 
 @Service
 public class ClientServiceImpl implements ClientService{
 	@Autowired
 	ClientRepositry clientRep;
+
 	@Override
 	public client addclient(client cl) {
 		return clientRep.save(cl);
@@ -23,6 +24,7 @@ public class ClientServiceImpl implements ClientService{
 
 	@Override
 	public List<client> addListclient(List<client> listclient) {
+
 		return clientRep.saveAll(listclient);
 	}
 
@@ -65,7 +67,6 @@ public class ClientServiceImpl implements ClientService{
 	public Map<String, Long> getMostPurchasedProducts(client client) {
 		Set<Facture> clientFactures = client.getFactures();
 		Map<String, Long> productCounts = new HashMap<>();
-
 		for (Facture facture : clientFactures) {
 			Set<DetailFacture> detailFactures = facture.getDetailFactures();
 			for (DetailFacture detailFacture : detailFactures) {
@@ -73,7 +74,6 @@ public class ClientServiceImpl implements ClientService{
 				productCounts.put(productCode, productCounts.getOrDefault(productCode, 0L) + 1);
 			}
 		}
-
 		return productCounts;
 	}
 	@Override
@@ -100,14 +100,12 @@ public class ClientServiceImpl implements ClientService{
 
 		return chiffreAffairesTotal;
 	}
-
 	@Override
 	public double calculerChiffreAffairesParAn(Long clientId, int annee) {
-		client client = clientRep.findById(clientId).orElse(null);
+		client client = clientRep.getclientById(clientId);
 		if (client == null) {
 			return 0.0;
 		}
-
 		double chiffreAffairesAnnee = 0.0;
 		Set<Facture> factures = client.getFactures();
 
@@ -116,10 +114,11 @@ public class ClientServiceImpl implements ClientService{
 				chiffreAffairesAnnee += calculerMontantTotal(facture);
 			}
 		}
-
+		System.out.println("Chiffre d'affaires pour l'année " + annee + "clientId  "+clientId +"  :"+ chiffreAffairesAnnee);
 		return chiffreAffairesAnnee;
 	}
-	private double calculerMontantTotal(Facture facture) {
+
+	public double calculerMontantTotal(Facture facture) {
 		double montantTotal = 0.0;
 		Set<DetailFacture> detailFactures = facture.getDetailFactures();
 
@@ -129,8 +128,7 @@ public class ClientServiceImpl implements ClientService{
 
 		return montantTotal;
 	}
-
-	private boolean isFacturePourAnnee(Facture facture, int annee) {
+	public boolean isFacturePourAnnee(Facture facture, int annee) {
 		String dateFacture = facture.getDateFact();
 
 		if (dateFacture != null && !dateFacture.isEmpty()) {
@@ -145,5 +143,36 @@ public class ClientServiceImpl implements ClientService{
 
 		return false;
 	}
+	@Override
+	public double calculerResteGlobalMontantsNonPayes(Long idClient) {
+		client client = clientRep.findById(idClient).orElse(null);
+		if (client == null) {
+			return 0.0;
+		}
+		double montantRestantGlobal = 0.0;
+		List<Facture> facturesNonReglees = getFacturesNonRegleesPourClient(idClient);
 
+		for (Facture facture : facturesNonReglees) {
+			double montantTotalFacture = calculerMontantTotal(facture);
+			double montantTotalPaye = calculerMontantTotalPaye(facture);
+
+			double montantRestant = montantTotalFacture - montantTotalPaye;
+
+			if (montantRestant > 0) {
+				montantRestantGlobal += montantRestant;
+			}
+		}
+
+		return montantRestantGlobal;
+	}
+
+	public double calculerMontantTotalPaye(Facture facture) {
+		double montantTotalPaye = 0.0;
+
+		for (ReglementFacture reglementFacture : facture.getReglementFactures()) {
+			montantTotalPaye += reglementFacture.getReglement().getMontantPayer();
+		}
+
+		return montantTotalPaye;
+	}
 }

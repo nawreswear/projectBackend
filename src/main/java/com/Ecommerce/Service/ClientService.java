@@ -21,4 +21,5 @@ public interface ClientService {
 	public List<Facture> getFacturesNonRegleesPourClient(Long idClient);
 	public double calculerChiffreAffairesGlobal(Long clientId);
 	public double calculerChiffreAffairesParAn(Long clientId, int annee);
+	public double calculerResteGlobalMontantsNonPayes(Long idClient);
 }
